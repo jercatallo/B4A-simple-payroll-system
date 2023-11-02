@@ -1,0 +1,129 @@
+﻿Build1=Default,b4a.example
+File1=catallodb.db
+File2=layAdd.bal
+File3=layAddUser.bal
+File4=layEdit.bal
+File5=layEditUser.bal
+File6=layMain.bal
+File7=Layout.bal
+File8=laySalary.bal
+File9=layUser.bal
+FileGroup1=Default Group
+FileGroup2=Default Group
+FileGroup3=Default Group
+FileGroup4=Default Group
+FileGroup5=Default Group
+FileGroup6=Default Group
+FileGroup7=Default Group
+FileGroup8=Default Group
+FileGroup9=Default Group
+Group=Default Group
+Library1=b4xtable
+Library2=core
+Library3=sql
+Library4=xcustomlistview
+Library5=xui
+Library6=xui views
+Library7=dialogs
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="29"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~'End of default text.~\n~
+Module1=AddRec
+Module2=AddUser
+Module3=EditRec
+Module4=EditUser
+Module5=MainRec
+Module6=SalaryEdit
+Module7=Starter
+Module8=UserRec
+NumberOfFiles=9
+NumberOfLibraries=7
+NumberOfModules=8
+Version=10.7
+@EndOfDesignText@
+Sub Process_Globals
+	'These global variables will be declared once when the application starts.
+	'These variables can be accessed from all modules.
+	Private xui As XUI
+	Dim sql As SQL
+	Dim rs As ResultSet
+End Sub
+
+Sub Globals
+	'These global variables will be redeclared each time the activity is created.
+	Private txtusername As EditText
+	Private txtpassword As EditText
+	Private chkpassword As CheckBox
+End Sub
+
+Sub Activity_Create(FirstTime As Boolean)
+	If FirstTime Then
+		CopyDb("catallodb.db")
+		sql.Initialize(File.DirInternal, "catallodb.db", False)
+	End If
+	Activity.LoadLayout("Layout")
+End Sub
+
+Sub Activity_Resume
+End Sub
+
+Sub Activity_Pause (UserClosed As Boolean)
+End Sub
+
+Sub CopyDb(Filename As String)
+	'File.Delete(File.DirInternal, "catallodb.db")
+	If File.Exists(File.DirInternal, Filename) = False Then
+		File.Copy(File.DirAssets, Filename, File.DirInternal, Filename)
+	End If
+End Sub
+
+Sub btnLogin_Click
+	Dim qry As String
+	Dim c1 As Cursor
+	
+	Dim mypass As String
+	Dim myfname As String
+	Dim mylevel As String
+	Dim myid As String
+	Dim myusername As String
+	
+	qry = "Select * from tbllogin where username = ?"
+	c1 = sql.ExecQuery2(qry, Array As String(txtusername.Text))
+	
+	If c1.RowCount > 0 Then
+		
+		c1.Position = 0
+		
+		mypass = c1.GetString("password")
+		myfname = c1.GetString("full_name")
+		mylevel = c1.GetString("level")
+		myid = c1.GetString("id")
+		myusername = c1.GetString("username")
+		If mypass = txtpassword.Text Then
+			Msgbox("Welcome "& myfname, "")
+			StartActivity(MainRec)
+			
+			txtusername.Text=""
+			txtpassword.Text=""
+			
+			MainRec.level = mylevel
+			MainRec.fname = myfname
+			MainRec.id = myid
+			MainRec.password = mypass
+		Else
+			Msgbox("Wrong Password","")
+		End If
+	Else
+		Msgbox("No Username Found","")
+	End If
+End Sub
+
+Sub btnClose_Click
+	Activity.Finish
+End Sub
+
+Private Sub chkpassword_CheckedChange(Checked As Boolean)
+	If chkpassword.Checked = True Then
+		txtpassword.PasswordMode = False
+	Else
+		txtpassword.PasswordMode = True
+	End If
+End Sub
